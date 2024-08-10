@@ -16,7 +16,11 @@
     require("dactl").setup({
       trd_path = "" -- absolute path of content folder of your KACTL repository goes here (this configuration is required)
     })
-  end
+  end,
+  dependencies = {
+    "rcarriga/nvim-notify",
+    "nvim-lua/plenary.nvim",
+  }
 }
 ```
 
@@ -29,7 +33,11 @@
     require("dactl").setup({
       trd_path = os.getenv("HOME") .. "/competitive_programming/dactl/content"
     })
-  end
+  end,
+  dependencies = {
+    "rcarriga/nvim-notify",
+    "nvim-lua/plenary.nvim",
+  }
 }
 ```
 
