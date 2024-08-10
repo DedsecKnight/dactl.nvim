@@ -32,3 +32,7 @@
   end
 }
 ```
+
+## Usage
+
+- In normal mode, type `DactlImport` and choose the snippet you want to import into your code file. Snippet will be injected into cursor position of active file.
