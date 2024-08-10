@@ -13,7 +13,7 @@ graph.build = function(filename)
     adj = {},
     content = {},
   }
-  g:dfs_helper(filename)
+  graph.dfs_helper(g, filename)
   return g
 end
 
