@@ -26,7 +26,8 @@ end
 ---@return string[]
 M.build_snippet = function(filename)
   local dep_graph = graph_utils.build(filename)
-  local aggregated_buffer = dep_graph:generate_aggregated_buffer()
+
+  local aggregated_buffer = graph_utils.generate_aggregated_buffer(dep_graph)
   return aggregated_buffer
 end
 

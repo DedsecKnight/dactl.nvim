@@ -6,21 +6,10 @@ local buffer_utils = require('dactl.buffer')
 local parser_utils = require('dactl.parser')
 local utils = require('dactl.utils')
 
+---@param g Graph
 ---@param filename string
----@return Graph
-graph.build = function(filename)
-  local g = {
-    adj = {},
-    content = {},
-  }
-  graph.dfs_helper(g, filename)
-  return g
-end
-
----@param filename string
-function graph:dfs_helper(filename)
-  self.adj[filename] = {}
-
+local function dfs_helper(g, filename)
+  g.adj[filename] = {}
   local path = utils.path_string_to_list(filename)
 
   local file_bufnr = buffer_utils.create_new_buffer(filename)
@@ -36,9 +25,9 @@ function graph:dfs_helper(filename)
     )
     local actual_path = utils.clean_path(temp_path)
     local next_filename = utils.join_string(actual_path, '/')
-    self.adj[filename][#self.adj[filename] + 1] = next_filename
-    if self.adj[next_filename] == nil then
-      self:dfs_helper(next_filename)
+    g.adj[filename][#g.adj[filename] + 1] = next_filename
+    if g.adj[next_filename] == nil then
+      dfs_helper(g, next_filename)
     end
   end
 
@@ -53,13 +42,25 @@ function graph:dfs_helper(filename)
     delta = delta + r[4] - r[1] + 1
   end
 
-  self.content[filename] = file_content
+  g.content[filename] = file_content
 
   buffer_utils.close_buffer(file_bufnr)
 end
 
+---@param filename string
+---@return Graph
+graph.build = function(filename)
+  local g = {
+    adj = {},
+    content = {},
+  }
+  dfs_helper(g, filename)
+  return g
+end
+
+---@param self Graph
 ---@return {[string]: string[]}
-function graph:reverse_edges()
+graph.reverse_edges = function(self)
   local rg = {}
   for node, neighbor_set in pairs(self.adj) do
     for _, neighbor in ipairs(neighbor_set) do
@@ -77,9 +78,10 @@ function graph:reverse_edges()
   return rg
 end
 
+---@param self Graph
 ---@return string[]
-function graph:get_topological_order()
-  local rg = self:reverse_edges()
+graph.get_topological_order = function(self)
+  local rg = graph.reverse_edges(self)
   local indegree = {}
   for node, neighbor_set in pairs(rg) do
     if indegree[node] == nil then
@@ -113,9 +115,11 @@ function graph:get_topological_order()
   return topological_order
 end
 
-function graph:generate_aggregated_buffer()
+---@param self Graph
+---@return string[]
+graph.generate_aggregated_buffer = function(self)
   local aggregated_buffer = {}
-  local topological_order = self:get_topological_order()
+  local topological_order = graph.get_topological_order(self)
   for _, filename in ipairs(topological_order) do
     aggregated_buffer = utils.array_merge(aggregated_buffer, self.content[filename])
   end
