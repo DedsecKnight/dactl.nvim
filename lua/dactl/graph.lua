@@ -24,7 +24,7 @@ local function dfs_helper(g, filename)
       utils.split_string(utils.trim_include_statement(text), '/')
     )
     local actual_path = utils.clean_path(temp_path)
-    local next_filename = utils.join_string(actual_path, '/')
+    local next_filename = '/' .. utils.join_string(actual_path, '/')
     g.adj[filename][#g.adj[filename] + 1] = next_filename
     if g.adj[next_filename] == nil then
       dfs_helper(g, next_filename)
