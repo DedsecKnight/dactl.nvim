@@ -37,10 +37,14 @@ M.inject_snippet = function()
       return string.sub(item, 58)
     end,
   }, function(filename)
-    local snippet = M.build_snippet(filename)
-    local cursor_row_index = buffer_utils.get_win_cursor_row_position()
-    buffer_utils.inject_snippet_at_row(snippet, cursor_row_index)
-    M.notify('Snippet injection completed')
+    if filename ~= nil then
+      local snippet = M.build_snippet(filename)
+      local cursor_row_index = buffer_utils.get_win_cursor_row_position()
+      buffer_utils.inject_snippet_at_row(snippet, cursor_row_index)
+      M.notify('DACTL: Snippet injection completed')
+    else
+      M.notify('DACTL: No file chosen')
+    end
   end)
 end
 
