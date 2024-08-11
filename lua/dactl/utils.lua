@@ -17,7 +17,7 @@ local function split_string(s, delimiter)
 end
 
 ---Merge t2 into t1
-------@param t1 any[]
+---@param t1 any[]
 ---@param t2 any[]
 local function array_merge(t1, t2)
   for i = 1, #t2 do

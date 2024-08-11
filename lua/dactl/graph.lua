@@ -6,8 +6,11 @@ local buffer_utils = require('dactl.buffer')
 local parser_utils = require('dactl.parser')
 local utils = require('dactl.utils')
 
+--- DFS Helper function for recursively building dependency graph
+--- and extract file content of each file in dependency graph
 ---@param g Graph
 ---@param filename string
+---@private
 local function dfs_helper(g, filename)
   g.adj[filename] = {}
   local path = utils.path_string_to_list(filename)
@@ -47,6 +50,7 @@ local function dfs_helper(g, filename)
   buffer_utils.close_buffer(file_bufnr)
 end
 
+---Construct a new dependency graph starting from provided file
 ---@param filename string
 ---@return Graph
 graph.build = function(filename)
@@ -58,8 +62,10 @@ graph.build = function(filename)
   return g
 end
 
+---Construct a new adjacency list from input graph but with all edges reversed in terms of direction.
 ---@param self Graph
 ---@return {[string]: string[]}
+---@private
 graph.reverse_edges = function(self)
   local rg = {}
   for node, neighbor_set in pairs(self.adj) do
@@ -78,8 +84,10 @@ graph.reverse_edges = function(self)
   return rg
 end
 
+---Construct topological order of each dependency using topological sort.
 ---@param self Graph
 ---@return string[]
+---@private
 graph.get_topological_order = function(self)
   local rg = graph.reverse_edges(self)
   local indegree = {}
@@ -115,6 +123,7 @@ graph.get_topological_order = function(self)
   return topological_order
 end
 
+---Aggregate content of all files in dependency graph to construct 1 single "buffer".
 ---@param self Graph
 ---@return string[]
 graph.generate_aggregated_buffer = function(self)

@@ -1,3 +1,4 @@
+---@return integer
 local function get_win_cursor_row_position()
   local res = vim.fn.getcurpos(0)
   return res[2]
