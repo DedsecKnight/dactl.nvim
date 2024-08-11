@@ -1,8 +1,12 @@
 local buffer_utils = require('dactl.buffer')
 local graph_utils = require('dactl.graph')
+local default_config = {
+  snippet_file_extensions = { 'cpp', 'h' },
+}
 
 ---@class DactlImporterConfigType
 ---@field trd_path string
+---@field snippet_file_extensions? string[]
 
 ---@class DactlImporter
 ---@field config DactlImporterConfigType
@@ -18,8 +22,19 @@ M.setup = function(opts)
   if opts.trd_path == nil then
     error('<trd_path> parameter is required for this plugin to run properly')
   end
-  M.config = vim.tbl_deep_extend('force', {}, opts)
-  M.files = M.plenary_scan.scan_dir(M.config.trd_path)
+  M.config = vim.tbl_deep_extend('force', default_config, opts)
+  M.files = M.plenary_scan.scan_dir(M.config.trd_path, {
+    ---@param e string
+    ---@return boolean
+    search_pattern = function(e)
+      for _, extension in ipairs(M.config.snippet_file_extensions) do
+        if string.sub(e, -1 - #extension, -1) == ('.' .. extension) then
+          return true
+        end
+      end
+      return false
+    end,
+  })
 end
 
 ---@param filename string
