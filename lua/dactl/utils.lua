@@ -1,7 +1,7 @@
 ---Extract file path from include statement
 ---@param include_statement string
 local function trim_include_statement(include_statement)
-  return string.sub(include_statement, 11, -2)
+  return string.sub(include_statement, 2, -2)
 end
 
 ---Split string into array of substrings at delimiter
