@@ -9,17 +9,11 @@ local function inject_snippet_at_row(snippet, row_index)
   vim.api.nvim_buf_set_lines(0, row_index - 1, row_index, false, snippet)
 end
 
----@param filename string
+---@param file_content string[]
 ---@return integer
-local function create_new_buffer(filename)
-  local bufnr = vim.fn.bufnr(filename)
-  if bufnr == -1 then
-    bufnr = vim.fn.bufadd(filename)
-  end
-  if not vim.api.nvim_buf_is_loaded(bufnr) then
-    vim.fn.bufload(bufnr)
-    vim.api.nvim_set_option_value('buflisted', true, { buf = bufnr })
-  end
+local function create_new_buffer(file_content)
+  local bufnr = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_lines(bufnr, 0, 1, true, file_content)
   return bufnr
 end
 

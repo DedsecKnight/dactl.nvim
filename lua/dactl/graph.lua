@@ -12,7 +12,8 @@ local function dfs_helper(g, filename)
   g.adj[filename] = {}
   local path = utils.path_string_to_list(filename)
 
-  local file_bufnr = buffer_utils.create_new_buffer(filename)
+  local file_content = utils.read_file(filename)
+  local file_bufnr = buffer_utils.create_new_buffer(file_content)
 
   local tree = parser_utils.get_parser_tree(file_bufnr)
   local include_query = parser_utils.get_include_matches()
@@ -31,7 +32,6 @@ local function dfs_helper(g, filename)
     end
   end
 
-  local file_content = utils.read_file(filename)
   local delta = 0
   local cleanup_query = parser_utils.get_non_snippet_matches()
   for _, n in cleanup_query:iter_captures(tree:root(), file_bufnr) do
