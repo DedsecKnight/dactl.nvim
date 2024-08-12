@@ -17,15 +17,13 @@ local function dfs_helper(g, filename)
 
   local file_content = utils.read_file(filename)
   local file_bufnr = buffer_utils.create_new_buffer(file_content)
+  local snippet_parser = parser_utils:new(file_bufnr)
 
-  local tree = parser_utils.get_parser_tree(file_bufnr)
-  local include_query = parser_utils.get_include_matches()
-
-  for _, n in include_query:iter_captures(tree:root(), file_bufnr) do
-    local text = vim.treesitter.get_node_text(n, file_bufnr)
+  local include_statements = snippet_parser:extract_include_statements()
+  for _, statement in ipairs(include_statements) do
     local temp_path = utils.array_merge(
       utils.table_copy(path),
-      utils.split_string(utils.trim_include_statement(text), '/')
+      utils.split_string(utils.trim_include_statement(statement), '/')
     )
     local actual_path = utils.clean_path(temp_path)
     local next_filename = '/' .. utils.join_string(actual_path, '/')
@@ -35,17 +33,7 @@ local function dfs_helper(g, filename)
     end
   end
 
-  local delta = 0
-  local cleanup_query = parser_utils.get_non_snippet_matches()
-  for _, n in cleanup_query:iter_captures(tree:root(), file_bufnr) do
-    local r = vim.treesitter.get_range(n, file_bufnr)
-    for _ = r[1] + 1 - delta, r[4] + 1 - delta, 1 do
-      table.remove(file_content, r[1] + 1 - delta)
-    end
-    delta = delta + r[4] - r[1] + 1
-  end
-
-  g.content[filename] = file_content
+  g.content[filename] = snippet_parser:extract_snippet_content()
 
   buffer_utils.close_buffer(file_bufnr)
 end
