@@ -8,11 +8,10 @@ local utils = require('dactl.utils')
 
 --- DFS Helper function for recursively building dependency graph
 --- and extract file content of each file in dependency graph
----@param g Graph
 ---@param filename string
 ---@private
-local function dfs_helper(g, filename)
-  g.adj[filename] = {}
+function graph:dfs_helper(filename)
+  self.adj[filename] = {}
   local path = utils.path_string_to_list(filename)
 
   local file_content = utils.read_file(filename)
@@ -27,13 +26,13 @@ local function dfs_helper(g, filename)
     )
     local actual_path = utils.clean_path(temp_path)
     local next_filename = '/' .. utils.join_string(actual_path, '/')
-    g.adj[filename][#g.adj[filename] + 1] = next_filename
-    if g.adj[next_filename] == nil then
-      dfs_helper(g, next_filename)
+    self.adj[filename][#self.adj[filename] + 1] = next_filename
+    if self.adj[next_filename] == nil then
+      self:dfs_helper(next_filename)
     end
   end
 
-  g.content[filename] = snippet_parser:extract_snippet_content()
+  self.content[filename] = snippet_parser:extract_snippet_content()
 
   buffer_utils.close_buffer(file_bufnr)
 end
@@ -41,20 +40,21 @@ end
 ---Construct a new dependency graph starting from provided file
 ---@param filename string
 ---@return Graph
-graph.build = function(filename)
+function graph:new(filename)
   local g = {
     adj = {},
     content = {},
   }
-  dfs_helper(g, filename)
+  setmetatable(g, self)
+  self.__index = self
+  g:dfs_helper(filename)
   return g
 end
 
 ---Construct a new adjacency list from input graph but with all edges reversed in terms of direction.
----@param self Graph
 ---@return {[string]: string[]}
 ---@private
-graph.reverse_edges = function(self)
+function graph:reverse_edges()
   local rg = {}
   for node, neighbor_set in pairs(self.adj) do
     for _, neighbor in ipairs(neighbor_set) do
@@ -73,11 +73,10 @@ graph.reverse_edges = function(self)
 end
 
 ---Construct topological order of each dependency using topological sort.
----@param self Graph
 ---@return string[]
 ---@private
-graph.get_topological_order = function(self)
-  local rg = graph.reverse_edges(self)
+function graph:get_topological_order()
+  local rg = self:reverse_edges()
   local indegree = {}
   for node, neighbor_set in pairs(rg) do
     if indegree[node] == nil then
@@ -112,11 +111,10 @@ graph.get_topological_order = function(self)
 end
 
 ---Aggregate content of all files in dependency graph to construct 1 single "buffer".
----@param self Graph
 ---@return string[]
-graph.generate_aggregated_buffer = function(self)
+function graph:generate_aggregated_buffer()
   local aggregated_buffer = {}
-  local topological_order = graph.get_topological_order(self)
+  local topological_order = self:get_topological_order()
   for _, filename in ipairs(topological_order) do
     aggregated_buffer = utils.array_merge(aggregated_buffer, self.content[filename])
   end

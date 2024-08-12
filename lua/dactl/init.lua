@@ -40,9 +40,9 @@ end
 ---@param filename string
 ---@return string[]
 M.build_snippet = function(filename)
-  local dep_graph = graph_utils.build(filename)
+  local dep_graph = graph_utils:new(filename)
 
-  local aggregated_buffer = graph_utils.generate_aggregated_buffer(dep_graph)
+  local aggregated_buffer = dep_graph:generate_aggregated_buffer()
   return aggregated_buffer
 end
 
