@@ -49,7 +49,7 @@ end
 M.inject_snippet = function()
   vim.ui.select(M.files, {
     format_item = function(item)
-      return string.sub(item, 58)
+      return string.sub(item, 56)
     end,
   }, function(filename)
     if filename ~= nil then
